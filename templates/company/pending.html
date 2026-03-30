@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Awaiting Approval{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-6 text-center">
+    <div class="card shadow-sm p-4">
+      <h4 class="mb-3">⏳ Awaiting Admin Approval</h4>
+      <p class="text-muted">
+        Your company <strong>{{ company.company_name }}</strong> has been registered successfully.
+        Please wait for the admin to approve your account before you can access the dashboard.
+      </p>
+      <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary mt-2">Logout</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

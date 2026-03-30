@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Login — Placement Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h4 class="card-title text-center mb-4">Sign In</h4>
+        <form method="POST" action="{{ url_for('auth.login') }}">
+
+          <div class="mb-3">
+            <label class="form-label">Login as</label>
+            <select name="role" class="form-select" required>
+              <option value="">-- Select Role --</option>
+              <option value="admin">Admin</option>
+              <option value="company">Company</option>
+              <option value="student">Student</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email / Username</label>
+            <input type="text" name="email" class="form-control" placeholder="Enter email or username" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+
+        <hr>
+        <div class="text-center small">
+          <p class="mb-1">New student? <a href="{{ url_for('auth.register_student') }}">Register here</a></p>
+          <p class="mb-0">New company? <a href="{{ url_for('auth.register_company') }}">Register here</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
