@@ -1,21 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from models import db, Admin, Company, Student
+from models import db, Company, Student
+from utils import login_required
 import os
 
 auth = Blueprint("auth", __name__)
-
-def login_required(role):
-
-    from functools import wraps
-    def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            if session.get("role") != role:
-                flash("Please log in to continue.", "warning")
-                return redirect(url_for("auth.login"))
-            return f(*args, **kwargs)
-        return wrapper
-    return decorator
 
 @auth.route("/")
 def index():
@@ -27,7 +15,7 @@ def index():
 def dashboard():
     role = session.get("role")
     if role == "admin":
-        return redirect(url_for("auth.admin_dashboard"))
+        return redirect(url_for("admin.dashboard"))
     if role == "company":
         return redirect(url_for("auth.company_dashboard"))
     if role == "student":
@@ -40,6 +28,7 @@ def login():
         return redirect(url_for("auth.dashboard"))
 
     if request.method == "POST":
+        from models import Admin
         role     = request.form.get("role")
         email    = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
@@ -51,7 +40,7 @@ def login():
                 session["user_id"] = user.id
                 session["name"]    = user.username
                 flash("Welcome, Admin!", "success")
-                return redirect(url_for("auth.admin_dashboard"))
+                return redirect(url_for("admin.dashboard"))
 
         elif role == "company":
             user = Company.query.filter_by(email=email).first()
@@ -165,15 +154,10 @@ def register_company():
         db.session.add(company)
         db.session.commit()
 
-        flash("Registration submitted! Please wait for admin approval before logging in.", "info")
+        flash("Registration submitted! Please wait for admin approval.", "info")
         return redirect(url_for("auth.login"))
 
     return render_template("auth/register_company.html")
-
-@auth.route("/admin/dashboard")
-@login_required("admin")
-def admin_dashboard():
-    return render_template("admin/dashboard.html", name=session.get("name"))
 
 @auth.route("/company/dashboard")
 @login_required("company")
