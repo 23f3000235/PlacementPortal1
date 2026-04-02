@@ -2,6 +2,108 @@
 {% block title %}Company Dashboard{% endblock %}
 
 {% block content %}
-<h3>Company Dashboard</h3>
-<p class="text-muted">Welcome, <strong>{{ company.company_name }}</strong>. Full dashboard coming in Commit 4.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="mb-0">{{ company.company_name }}</h3>
+    <small class="text-muted">{{ company.industry or '' }} &bull; {{ company.website or '' }}</small>
+  </div>
+  <a href="{{ url_for('company.create_drive') }}" class="btn btn-primary">+ Post New Drive</a>
+</div>
+
+<!-- Company Info Card -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-4">
+        <p class="mb-1 text-muted small">HR Contact</p>
+        <p class="fw-semibold">{{ company.hr_contact }}</p>
+      </div>
+      <div class="col-md-4">
+        <p class="mb-1 text-muted small">Email</p>
+        <p class="fw-semibold">{{ company.email }}</p>
+      </div>
+      <div class="col-md-4">
+        <p class="mb-1 text-muted small">Account Status</p>
+        <span class="badge bg-success">Approved</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Placement Drives -->
+<h5 class="mb-3">Your Placement Drives</h5>
+
+{% if drive_data %}
+<div class="row g-3">
+  {% for item in drive_data %}
+  {% set drive = item.drive %}
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h6 class="fw-bold mb-0">{{ drive.job_title }}</h6>
+          {% if drive.status == 'Approved' %}
+            <span class="badge bg-success">Approved</span>
+          {% elif drive.status == 'Closed' %}
+            <span class="badge bg-secondary">Closed</span>
+          {% elif drive.status == 'Rejected' %}
+            <span class="badge bg-danger">Rejected</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+          {% endif %}
+        </div>
+
+        <p class="text-muted small mb-1">
+          Deadline: {{ drive.application_deadline }} &bull;
+          Salary: {{ drive.salary_range or '—' }}
+        </p>
+        <p class="text-muted small mb-2">
+          Skills: {{ drive.required_skills or '—' }}
+        </p>
+
+        <div class="mb-3">
+          <span class="fw-semibold">{{ item.applicant_count }}</span>
+          <span class="text-muted small"> applicant{{ 's' if item.applicant_count != 1 }}</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{{ url_for('company.drive_applications', drive_id=drive.id) }}"
+             class="btn btn-outline-primary btn-sm">View Applications</a>
+
+          {% if drive.status != 'Closed' %}
+          <a href="{{ url_for('company.edit_drive', drive_id=drive.id) }}"
+             class="btn btn-outline-secondary btn-sm">Edit</a>
+
+          <form method="POST" action="{{ url_for('company.close_drive', drive_id=drive.id) }}"
+                class="d-inline">
+            <button class="btn btn-outline-warning btn-sm"
+                    onclick="return confirm('Close this drive?')">Close</button>
+          </form>
+          {% endif %}
+
+          {% if drive.status in ['Pending', 'Rejected'] %}
+          <form method="POST" action="{{ url_for('company.delete_drive', drive_id=drive.id) }}"
+                class="d-inline">
+            <button class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Delete this drive?')">Delete</button>
+          </form>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="card shadow-sm">
+  <div class="card-body text-center text-muted py-5">
+    <p class="mb-2">No placement drives posted yet.</p>
+    <a href="{{ url_for('company.create_drive') }}" class="btn btn-primary btn-sm">Post Your First Drive</a>
+  </div>
+</div>
+{% endif %}
 {% endblock %}

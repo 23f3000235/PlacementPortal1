@@ -17,7 +17,7 @@ def dashboard():
     if role == "admin":
         return redirect(url_for("admin.dashboard"))
     if role == "company":
-        return redirect(url_for("auth.company_dashboard"))
+        return redirect(url_for("company.dashboard"))
     if role == "student":
         return redirect(url_for("auth.student_dashboard"))
     return redirect(url_for("auth.login"))
@@ -52,7 +52,7 @@ def login():
                 session["user_id"] = user.id
                 session["name"]    = user.company_name
                 flash(f"Welcome, {user.company_name}!", "success")
-                return redirect(url_for("auth.company_dashboard"))
+                return redirect(url_for("company.dashboard"))
 
         elif role == "student":
             user = Student.query.filter_by(email=email).first()
@@ -159,16 +159,9 @@ def register_company():
 
     return render_template("auth/register_company.html")
 
-@auth.route("/company/dashboard")
-@login_required("company")
-def company_dashboard():
-    company = Company.query.get(session["user_id"])
-    if company.approval_status != "Approved":
-        return render_template("company/pending.html", company=company)
-    return render_template("company/dashboard.html", company=company)
-
 @auth.route("/student/dashboard")
 @login_required("student")
 def student_dashboard():
+    from models import Student
     student = Student.query.get(session["user_id"])
     return render_template("student/dashboard.html", student=student)

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Applications — {{ drive.job_title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="mb-0">{{ drive.job_title }}</h3>
+    <small class="text-muted">{{ company.company_name }} &bull; Deadline: {{ drive.application_deadline }}</small>
+  </div>
+  <a href="{{ url_for('company.dashboard') }}" class="btn btn-outline-secondary btn-sm">← Dashboard</a>
+</div>
+
+{% if applications %}
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Student</th>
+          <th>Email</th>
+          <th>Roll No.</th>
+          <th>Skills</th>
+          <th>Resume</th>
+          <th>Applied On</th>
+          <th>Status</th>
+          <th>Update</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in applications %}
+        <tr>
+          <td>{{ a.student.name }}</td>
+          <td>{{ a.student.email }}</td>
+          <td>{{ a.student.roll_number or '—' }}</td>
+          <td>
+            <span class="text-muted small">{{ a.student.skills or '—' }}</span>
+          </td>
+          <td>
+            {% if a.student.resume_filename %}
+            <a href="{{ url_for('static', filename='uploads/' + a.student.resume_filename) }}"
+               target="_blank" class="btn btn-outline-secondary btn-sm">View</a>
+            {% else %}
+            <span class="text-muted small">None</span>
+            {% endif %}
+          </td>
+          <td>{{ a.application_date.strftime('%d %b %Y') }}</td>
+          <td>
+            {% set colors = {
+              'Applied': 'primary', 'Shortlisted': 'info',
+              'Interview': 'warning', 'Selected': 'success', 'Rejected': 'danger'
+            } %}
+            <span class="badge bg-{{ colors.get(a.status, 'secondary') }}">{{ a.status }}</span>
+          </td>
+          <td>
+            <form method="POST"
+                  action="{{ url_for('company.update_application_status', application_id=a.id) }}">
+              <div class="d-flex gap-1">
+                <select name="status" class="form-select form-select-sm">
+                  {% for s in ['Applied', 'Shortlisted', 'Interview', 'Selected', 'Rejected'] %}
+                  <option value="{{ s }}" {{ 'selected' if a.status == s }}>{{ s }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">✓</button>
+              </div>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+<div class="card shadow-sm">
+  <div class="card-body text-center text-muted py-5">
+    No applications received for this drive yet.
+  </div>
+</div>
+{% endif %}
+{% endblock %}
