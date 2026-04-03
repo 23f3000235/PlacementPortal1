@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Placement Records{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="mb-0">All Placement Records</h3>
+  <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm">← Dashboard</a>
+</div>
+
+{% if placements %}
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Student</th>
+          <th>Roll No.</th>
+          <th>Company</th>
+          <th>Job Title</th>
+          <th>Package</th>
+          <th>Placed On</th>
+          <th>Profile</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in placements %}
+        <tr>
+          <td>{{ p.student.name }}</td>
+          <td>{{ p.student.roll_number or '—' }}</td>
+          <td>{{ p.company.company_name }}</td>
+          <td>{{ p.drive.job_title }}</td>
+          <td>{{ p.package or '—' }}</td>
+          <td>{{ p.placement_date }}</td>
+          <td>
+            <a href="{{ url_for('admin.student_profile', student_id=p.student.id) }}"
+               class="btn btn-outline-primary btn-sm">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+<div class="card shadow-sm">
+  <div class="card-body text-center text-muted py-5">
+    No placement records yet.
+  </div>
+</div>
+{% endif %}
+{% endblock %}

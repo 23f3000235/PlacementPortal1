@@ -247,3 +247,35 @@ def update_application_status(application_id):
     db.session.commit()
     flash(f"Application status updated to '{new_status}'.", "success")
     return redirect(url_for("company.drive_applications", drive_id=application.drive_id))
+
+# ── student profile view (from applications page) ──────────────────────────────
+
+@company_bp.route("/student/<int:student_id>/profile")
+@login_required("company")
+@approved_only
+def student_profile(student_id):
+    company = get_current_company()
+    student = Student.query.get_or_404(student_id)
+
+    # Only allow viewing if student has applied to one of this company's drives
+    has_application = Application.query.join(PlacementDrive).filter(
+        Application.student_id == student_id,
+        PlacementDrive.company_id == company.id
+    ).first()
+
+    if not has_application:
+        flash("You can only view profiles of students who applied to your drives.", "danger")
+        return redirect(url_for("company.dashboard"))
+
+    # Get only this student's applications to this company's drives
+    applications = Application.query.join(PlacementDrive).filter(
+        Application.student_id == student_id,
+        PlacementDrive.company_id == company.id
+    ).all()
+
+    return render_template(
+        "company/student_profile.html",
+        student=student,
+        applications=applications,
+        company=company
+    )

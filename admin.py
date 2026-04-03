@@ -126,3 +126,29 @@ def reject_drive(drive_id):
 def applications():
     all_applications = Application.query.order_by(Application.application_date.desc()).all()
     return render_template("admin/applications.html", applications=all_applications)
+
+# ── student profile view ───────────────────────────────────────────────────────
+
+@admin.route("/student/<int:student_id>/profile")
+@login_required("admin")
+def student_profile(student_id):
+    student      = Student.query.get_or_404(student_id)
+    applications = Application.query.filter_by(student_id=student_id)\
+                                    .order_by(Application.application_date.desc()).all()
+    placements   = Placement.query.filter_by(student_id=student_id).all()
+
+    return render_template(
+        "admin/student_profile.html",
+        student=student,
+        applications=applications,
+        placements=placements
+    )
+
+
+# ── all placement records ──────────────────────────────────────────────────────
+
+@admin.route("/placements")
+@login_required("admin")
+def placements():
+    all_placements = Placement.query.order_by(Placement.placement_date.desc()).all()
+    return render_template("admin/placements.html", placements=all_placements)

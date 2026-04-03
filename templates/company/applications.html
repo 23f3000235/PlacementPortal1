@@ -29,7 +29,11 @@
       <tbody>
         {% for a in applications %}
         <tr>
-          <td>{{ a.student.name }}</td>
+          <td>
+  <a href="{{ url_for('company.student_profile', student_id=a.student.id) }}">
+    {{ a.student.name }}
+  </a>
+</td>
           <td>{{ a.student.email }}</td>
           <td>{{ a.student.roll_number or '—' }}</td>
           <td>
