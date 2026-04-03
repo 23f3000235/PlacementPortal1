@@ -19,7 +19,7 @@ def dashboard():
     if role == "company":
         return redirect(url_for("company.dashboard"))
     if role == "student":
-        return redirect(url_for("auth.student_dashboard"))
+        return redirect(url_for("student.dashboard"))
     return redirect(url_for("auth.login"))
 
 @auth.route("/login", methods=["GET", "POST"])
@@ -64,7 +64,7 @@ def login():
                 session["user_id"] = user.id
                 session["name"]    = user.name
                 flash(f"Welcome, {user.name}!", "success")
-                return redirect(url_for("auth.student_dashboard"))
+                return redirect(url_for("student.dashboard"))
 
         flash("Invalid credentials. Please try again.", "danger")
 
@@ -158,10 +158,3 @@ def register_company():
         return redirect(url_for("auth.login"))
 
     return render_template("auth/register_company.html")
-
-@auth.route("/student/dashboard")
-@login_required("student")
-def student_dashboard():
-    from models import Student
-    student = Student.query.get(session["user_id"])
-    return render_template("student/dashboard.html", student=student)

@@ -2,6 +2,110 @@
 {% block title %}Student Dashboard{% endblock %}
 
 {% block content %}
-<h3>Student Dashboard</h3>
-<p class="text-muted">Welcome, <strong>{{ student.name }}</strong>. Full dashboard coming in Commit 5.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="mb-0">{{ student.name }}</h3>
+    <small class="text-muted">{{ student.email }} &bull; {{ student.roll_number or 'No roll number' }}</small>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('student.edit_profile') }}" class="btn btn-outline-secondary btn-sm">Edit Profile</a>
+    <a href="{{ url_for('student.drives') }}" class="btn btn-primary btn-sm">Browse Drives</a>
+  </div>
+</div>
+
+<!-- Profile summary -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-4">
+        <p class="text-muted small mb-1">Education</p>
+        <p class="fw-semibold mb-0">{{ student.education or '—' }}</p>
+      </div>
+      <div class="col-md-4">
+        <p class="text-muted small mb-1">Skills</p>
+        <p class="fw-semibold mb-0">{{ student.skills or '—' }}</p>
+      </div>
+      <div class="col-md-4">
+        <p class="text-muted small mb-1">Resume</p>
+        {% if student.resume_filename %}
+          <a href="{{ url_for('static', filename='uploads/' + student.resume_filename) }}"
+             target="_blank" class="btn btn-outline-secondary btn-sm">View Resume</a>
+        {% else %}
+          <span class="text-muted small">Not uploaded</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent application status — notification style -->
+{% if recent_applications %}
+<h5 class="mb-3">Recent Application Updates</h5>
+<div class="row g-2 mb-4">
+  {% for a in recent_applications %}
+  {% set colors = {
+    'Applied': 'primary', 'Shortlisted': 'info',
+    'Interview': 'warning', 'Selected': 'success', 'Rejected': 'danger'
+  } %}
+  <div class="col-12">
+    <div class="alert alert-{{ colors.get(a.status, 'secondary') }} d-flex justify-content-between align-items-center py-2 mb-0">
+      <span>
+        <strong>{{ a.drive.job_title }}</strong> at {{ a.drive.company.company_name }}
+      </span>
+      <span class="badge bg-{{ colors.get(a.status, 'secondary') }} text-white">{{ a.status }}</span>
+    </div>
+  </div>
+  {% endfor %}
+  <div class="col-12">
+    <a href="{{ url_for('student.my_applications') }}" class="small">View all applications →</a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Available approved drives -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0">Open Placement Drives</h5>
+  <a href="{{ url_for('student.drives') }}" class="small">View all →</a>
+</div>
+
+{% if approved_drives %}
+<div class="row g-3">
+  {% for drive in approved_drives[:4] %}
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <h6 class="fw-bold mb-0">{{ drive.job_title }}</h6>
+          {% if drive.id in applied_drive_ids %}
+            <span class="badge bg-secondary">Applied</span>
+          {% else %}
+            <span class="badge bg-success">Open</span>
+          {% endif %}
+        </div>
+        <p class="text-muted small mb-1">{{ drive.company.company_name }}</p>
+        <p class="text-muted small mb-2">
+          Deadline: {{ drive.application_deadline }} &bull; {{ drive.salary_range or 'Salary N/A' }}
+        </p>
+        <p class="small mb-3">{{ drive.required_skills or '—' }}</p>
+
+        {% if drive.id not in applied_drive_ids %}
+        <form method="POST" action="{{ url_for('student.apply', drive_id=drive.id) }}">
+          <button class="btn btn-primary btn-sm">Apply Now</button>
+        </form>
+        {% else %}
+        <button class="btn btn-secondary btn-sm" disabled>Already Applied</button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="card shadow-sm">
+  <div class="card-body text-center text-muted py-4">
+    No approved placement drives available right now.
+  </div>
+</div>
+{% endif %}
 {% endblock %}
